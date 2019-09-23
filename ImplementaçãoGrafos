@@ -1,0 +1,192 @@
+
+#include<iostream>
+using namespace std;
+
+template<typename P, typename S>
+struct Par {
+    P primeiro;
+    S segundo;
+};
+
+template<typename N>
+class No{
+private:
+    N           conteudo;
+    No<N>*      prox;
+    No<N>*      ant;
+public:
+    No(){}
+
+    void setConteudo(N novoConteudo){
+        this->conteudo = novoConteudo;
+    }
+
+    void setProx(No<N>* novoProx){
+        this->prox = novoProx;
+    }
+
+    void setAnt(No<N>* novoAnt){
+        this->ant = novoAnt;
+    }
+
+    N getConteudo(){
+        return this->conteudo;
+    }
+
+    No<N>* getProx(){
+        return this->prox;
+    }
+
+    No<N>* getAnt(){
+        return this->ant;
+    }
+};
+
+template<typename L>
+class Lista{
+private:
+    No<L>*      inicio;
+    No<L>*      fim;
+    No<L>*      aux;
+    int         tam;
+public:
+    Lista(){
+        this->aux = new No<L>();
+        this->inicio = new No<L>();
+        this->fim = this->inicio;
+        this->tam = 0;
+    }
+
+    int getTam(){
+        return tam;
+    }
+
+    No<L>* getPos(int indice){
+        if(indice>=tam){
+            cout<<"posicao nao existe"<<endl;
+            return inicio;
+        }
+        for(aux = inicio->getProx() ; indice ; indice-- , aux = aux->getProx());
+        return aux;
+    }
+
+    void addConteudo(L novoConteudo){
+        this->fim->setProx(new No<L>());
+        this->fim->getProx()->setAnt(this->fim);
+        this->fim = this->fim->getProx();
+        this->fim->setConteudo(novoConteudo);
+        tam++;
+    }
+
+    void remove(No<L>* removido){
+      if(tam == 0 || removido == NULL || removido == inicio)  cout << "Impossivel Remover" << endl;
+      else{
+        No<L>* predRemovido = removido->getAnt();
+        predRemovido->setProx(removido->getProx());
+        if(removido == fim) fim = predRemovido;
+        delete removido;
+        tam--;
+      }
+    }
+
+    void imprimirFrenteTras(){
+        for(aux = inicio->getProx(); aux != fim->getProx() ; aux = aux->getProx()){
+            cout<<aux->getConteudo()<<endl;
+        }
+    }
+
+    void imprimirTrasFrente(){
+        for(aux = fim; aux != inicio ; aux = aux->getAnt()){
+            cout<<aux->getConteudo()<<endl;
+        }
+    }
+};
+
+template<typename W>
+class Grafo{
+private:
+
+    Lista<Lista<Par<int,W> >* >* grafo;
+    int     vertice;
+    int     aresta;
+
+    void inicializa(int vertices){
+        grafo = new Lista<Lista<Par<int,W> >* >();
+        Par<int,W> paux;
+        for(int i = 0 ; i <= vertice ; i++){
+            Lista<Par<int,W> >* aux = new Lista<Par<int,W> >();
+            paux.primeiro = i;
+            paux.segundo = 1;
+            aux->addConteudo(paux);
+            grafo->addConteudo(aux);
+        }
+    }
+
+    void entrada(int ponderado){
+        if(ponderado){
+            cout<<"Insira o vertice e a aresta"<<endl;
+            cin>>vertice>>aresta;
+            inicializa(vertice);
+            int u;
+            int v;
+            W   w;
+            Par<int,W> paux;
+            for(int i = 0 ; i < aresta ; i++){
+                cout<<"coloque a posicao, para onde vai e o peso"<<endl;
+                cin>>u>>v>>w;
+                paux.primeiro = v;
+                paux.segundo = w;
+                grafo->getPos(u)->getConteudo()->addConteudo(paux);
+                paux.primeiro = u;
+                paux.segundo = w;
+                grafo->getPos(v)->getConteudo()->addConteudo(paux);
+            }
+        } else {
+            cin>>vertice>>aresta;
+            inicializa(vertice);
+            int u;
+            int v;
+            W   w;
+            Par<int,W> paux;
+            for(int i = 0 ; i < aresta ; i++){
+                cin>>u>>v;
+                paux.primeiro = v;
+                paux.segundo = 1;
+                grafo->getPos(u)->getConteudo()->addConteudo(paux);
+                paux.primeiro = u;
+                paux.segundo = 1;
+                grafo->getPos(v)->getConteudo()->addConteudo(paux);
+            }
+        }
+    }
+
+public:
+    Grafo(int ponderado){
+        entrada(ponderado);
+    }
+
+    Lista<Lista<Par<int,W> >* >* getListAdj(){
+        return grafo;
+    }
+
+    int getQtdVertice(){
+        return vertice;
+    }
+
+    void printListaAdj(){
+        for(int i = 1 ; i < grafo->getTam() ; i++ ){
+            cout<<i<<" ->";
+            for(int j = 1 ; j < grafo->getPos(i)->getConteudo()->getTam() ; j++ ){
+                cout<<"   "<<grafo->getPos(i)->getConteudo()->getPos(j)->getConteudo().primeiro;
+                cout<<"-"<<grafo->getPos(i)->getConteudo()->getPos(j)->getConteudo().segundo;
+            }
+            cout<<endl;
+        }
+    }
+};
+
+int main (){
+    Grafo<int>* trabalho = new Grafo<int>(1);
+    trabalho->printListaAdj();
+    return 0;
+}
